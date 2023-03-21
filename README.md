@@ -1,39 +1,39 @@
-这里有一个 live 版本可以让您体验一下：https://rum-chat.prsdev.club
+# Rum Chat
 
-如果您想要在本地运行，可以参考如下步骤：
+Chat room built with Rum
 
-## 获取代码
+If you want to run it on your own computer, follow these steps:
+
+## Get the code
 
 ```
 git clone https://github.com/okdaodine/rum-chat.git
 ```
 
-## 配置 Rum Group
+## Configure Rum Group
 
-1. 打开 [Quorum open node](https://node.rumsystem.net/)
-2. 使用 Github 登录
-3. 创建一个 group
-4. 打开 group
-5. 复制 seed
-6. 将 seed 填写到 `server/config.js` 里面的 `seedUrl`。
+1. Open [Quorum open node](https://node.rumsystem.net/)
+2. Log in with Github
+3. Create a group
+4. Open the group
+5. Copy the seed
+6. Fill in the `seedUrl` in `server/config.js`.
 
-这样就完成了 Rum Group 的配置啦。
+Done! let's start using this Rum Group.
 
-好，接下来让我们开始使用这个 Rum Group 吧。
+## Start the frontend service
+(This example is developed in JavaScript, so please install nodejs first)
 
-## 启动前端服务
-（这个例子使用 js 开发，所以请先安装 nodejs 哦）
-
-在根目录下，运行：
+In the root directory, run:
 
 ```
 yarn install
 yarn dev
 ```
 
-## 启动后端服务
+## Start the backend service
 
-另外起一个终端界面，执行：
+Open another terminal window and execute:
 
 ```
 cd server
@@ -41,6 +41,6 @@ yarn install
 yarn dev
 ```
 
-## 访问服务
+## Access the service
 
 http://localhost:3000
