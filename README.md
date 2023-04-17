@@ -14,7 +14,22 @@ Open in your browser.
 git clone https://github.com/okdaodine/rum-chat-html.git
 ```
 
-## Configure Rum Group
+## Start service
+
+```
+yarn install
+yarn dev
+```
+
+Now, the server is running on http://localhost:3000
+
+## Build
+
+```
+yarn build
+```
+
+## Use a new group
 
 1. Open [Quorum open node](https://node.rumsystem.net/)
 2. Log in with Github
@@ -23,24 +38,4 @@ git clone https://github.com/okdaodine/rum-chat-html.git
 5. Copy the seed
 6. Fill in the `seedUrl` in `public/index.html`.
 
-Done! let's start using this Rum Group.
-
-## Start service
-(This example is developed in JavaScript, so please install nodejs first)
-
-In the root directory, run:
-
-```
-yarn install
-yarn dev
-```
-
-Now, the server running on http://localhost:3000
-
-## Build
-
-```
-yarn build
-```
-
-
+Done!
