@@ -34,5 +34,3 @@ yarn build
 4. Open the group
 5. Copy the seed
 6. Fill in the `seedUrl` in `public/index.html`.
-
-Done!
