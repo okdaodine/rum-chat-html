@@ -4,7 +4,7 @@ Chat room built with Rum.
 
 ## Example
 
-Download html file: https://github.com/okdaodine/rum-chat-html/blob/main/example.html.
+Download html file: https://raw.githubusercontent.com/okdaodine/rum-chat-html/main/rum_chat.html.
 
 Open in your browser.
 
