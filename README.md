@@ -10,15 +10,10 @@ Open in your browser.
 
 ![Xnip2023-04-17_14-18-23](https://user-images.githubusercontent.com/121039502/232400647-b7616478-71c7-4f48-bc6e-a6a5c6fd76d4.png)
 
-## Get the code
-
-```
-git clone https://github.com/okdaodine/rum-chat-html.git
-```
-
 ## Run
 
 ```
+git clone https://github.com/okdaodine/rum-chat-html.git
 yarn install
 yarn dev
 ```
