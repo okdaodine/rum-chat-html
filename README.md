@@ -1,13 +1,17 @@
 # Rum Chat
 
-Chat room built with Rum
+Chat room built with Rum.
 
-If you want to run it on your own computer, follow these steps:
+## Example
+
+Download html file: https://github.com/okdaodine/rum-chat-html/blob/main/example.html.
+
+Open in your browser.
 
 ## Get the code
 
 ```
-git clone https://github.com/okdaodine/rum-chat.git
+git clone https://github.com/okdaodine/rum-chat-html.git
 ```
 
 ## Configure Rum Group
@@ -17,26 +21,16 @@ git clone https://github.com/okdaodine/rum-chat.git
 3. Create a group
 4. Open the group
 5. Copy the seed
-6. Fill in the `seedUrl` in `server/config.js`.
+6. Fill in the `seedUrl` in `public/index.html`.
 
 Done! let's start using this Rum Group.
 
-## Start the frontend service
+## Start service
 (This example is developed in JavaScript, so please install nodejs first)
 
 In the root directory, run:
 
 ```
-yarn install
-yarn dev
-```
-
-## Start the backend service
-
-Open another terminal window and execute:
-
-```
-cd server
 yarn install
 yarn dev
 ```
