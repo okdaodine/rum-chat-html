@@ -16,7 +16,7 @@ Open in your browser.
 git clone https://github.com/okdaodine/rum-chat-html.git
 ```
 
-## Start service
+## Run
 
 ```
 yarn install
