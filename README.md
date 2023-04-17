@@ -35,6 +35,12 @@ yarn install
 yarn dev
 ```
 
-## Access the service
+Now, the server running on http://localhost:3000
 
-http://localhost:3000
+## Build
+
+```
+yarn build
+```
+
+
