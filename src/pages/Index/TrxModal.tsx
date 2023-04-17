@@ -1,8 +1,8 @@
 import React from 'react';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import Dialog from 'components/Dialog';
-import { TrxApi } from 'apis';
 import { useStore } from 'store';
+import RumSdk from 'rum-sdk-browser';
 
 interface IProps {
   groupId: string
@@ -21,7 +21,7 @@ const Trx = observer((props: IProps) => {
   React.useEffect(() => {
     (async () => {
       try {
-        const trx = await TrxApi.get(props.trxId);
+        const trx = await RumSdk.chain.Trx.get(props.groupId, props.trxId);
         console.log({ trx });
         state.trx = trx;
       } catch (err) {
@@ -36,7 +36,7 @@ const Trx = observer((props: IProps) => {
 
   return (
     <div className="p-8">
-      <div className="border border-gray-af bg-gray-f2 p-4 text-12 text-gray-700 tracking-wide text-left w-[500px] h-[300px] overflow-auto">
+      <div className="border border-gray-af bg-gray-f2 p-4 text-12 text-gray-700 tracking-wide text-left w-[500px] h-[190px] overflow-auto">
         <pre dangerouslySetInnerHTML={{ __html: JSON.stringify(state.trx, null, 2) }} />
       </div>
     </div>

@@ -19,7 +19,7 @@ const AppRouter = () => {
           <ConfirmDialog />
 
           <div className="fixed bottom-10 right-10">
-            <a className="mt-5 p-3 text-gray-70 text-13 cursor-pointer" target="_blank" rel="noreferrer" href="https://github.com/okdaodine/rum-chat">
+            <a className="mt-5 p-3 text-gray-70 text-13 cursor-pointer" target="_blank" rel="noreferrer" href="https://github.com/okdaodine/rum-chat-html">
               <AiOutlineGithub className="text-46" />
             </a>
           </div>

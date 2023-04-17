@@ -12,12 +12,12 @@ import classNames from 'classnames';
 import KeystoreModal from './KeystoreModal';
 import TrxModal from './TrxModal';
 import multiavatar from '@multiavatar/multiavatar'
-import { ConfigApi, TrxApi, PostApi } from 'apis';
-import { IPost } from 'apis/types';
-import { TrxStorage } from 'apis/common';
 import store from 'store2';
-import { initSocket, getSocket } from 'utils/socket';
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
+import Query from 'utils/query';
+import RumSdk, { IObject, IActivity } from 'rum-sdk-browser';
+import { runInAction } from 'mobx';
+import Loading from 'components/Loading';
 
 export default observer(() => {
   const { snackbarStore, confirmDialogStore } = useStore();
@@ -25,7 +25,9 @@ export default observer(() => {
     started: !!store('privateKey'),
     inputValue: '',
     ids: [] as string[],
-    map: {} as Record<string, IPost>,
+    map: {} as Record<string, IObject>,
+    postAddressMap: {} as Record<string, string>,
+    postTrxMap: {} as Record<string, string>,
     showMenu: false,
     privateKey: '',
     address: '',
@@ -48,9 +50,11 @@ export default observer(() => {
   React.useEffect(() => {
     (async () => {
       try {
-        const config = await ConfigApi.get();
-        store('seedUrl', config.seedUrl);
-        state.group = utils.seedUrlToGroup(config.seedUrl);
+        const seedUrl = Query.get('seedUrl') || (window as any).seedUrl;
+        store('seedUrl', seedUrl);
+        RumSdk.cache.Group.clear();
+        RumSdk.cache.Group.add(store('seedUrl'));
+        state.group = utils.seedUrlToGroup(seedUrl);
         state.configReady = true;
       } catch (_) {}
     })();
@@ -83,25 +87,9 @@ export default observer(() => {
     }
 
     list();
+    setInterval(list, 1000);
   }, [state.started]);
 
-  React.useEffect(() => {
-    const listener = async (post: IPost) => {
-      console.log('received a post');
-      console.log({ post });
-      if (state.map[post.id]) {
-        state.map[post.id].storage = TrxStorage.chain;
-      } else {
-        state.ids.push(post.id);
-        state.map[post.id] = post;
-      }
-    }
-    initSocket();
-    getSocket().on('post', listener);
-    return () => {
-      getSocket().off('post', listener);
-    }
-  }, []);
 
   const goToBottom = () => {
     if (listContainerRef.current && listContainerRef.current?.lastChild) {
@@ -109,18 +97,49 @@ export default observer(() => {
     }
   }
 
+  function isVisible(element: any) {
+    const rect = element.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+  
+    return (
+      rect.bottom >= 0 &&
+      rect.right >= 0 &&
+      rect.top <= windowHeight &&
+      rect.left <= windowWidth
+    );
+  }
+
   const list = async () => {
     try {
-      const posts = await PostApi.list();
-      for (const post of posts) {
-        if (!state.map[post.id]) {
-          state.ids.push(post.id);
-          state.map[post.id] = post;
+      const contents = await RumSdk.chain.Content.list({
+        groupId: state.group.groupId,
+        ...(state.postReady ? { reverse: true, count: 5 } : { count: 999 })
+      });
+      for (const content of contents) {
+        if (content) {
+          const post = (content.Data as IActivity).object!;
+          const postId = post.id!;
+          if (!state.map[postId]) {
+            state.ids.push(postId);
+          }
+          state.map[postId] = post;
+          state.postAddressMap[postId] = RumSdk.utils.pubkeyToAddress(content.SenderPubkey);
+          state.postTrxMap[postId] = content.TrxId;
         }
       }
-      await sleep(1);
-      goToBottom();
-      state.postReady = true;
+      if (!state.postReady) {
+        await sleep(1);
+        goToBottom();
+        state.postReady = true;
+      } else {
+        if (listContainerRef.current && listContainerRef.current?.lastChild) {
+          if (isVisible(listContainerRef.current?.lastChild as any)) {
+            await sleep(1);
+            goToBottom();
+          }
+        }
+      }
     } catch (err) {
       console.log(err);
     }
@@ -132,25 +151,27 @@ export default observer(() => {
     }
     state.sending = true;
     try {
-      const postId = uuidv4()
-      const res = await TrxApi.createActivity({
+      const postId = uuidv4();
+      const data = {
         type: 'Create',
         object: {
-          id: postId,
           type: 'Note',
+          id: postId,
           content: value,
-        }
+        },
+        published: new Date().toISOString(),
+      };
+      const res = await RumSdk.chain.Trx.create({
+        data,
+        groupId: state.group.groupId,
+        privateKey: store('privateKey'),
       });
       console.log({ res });
-      state.ids.push(postId);
-      state.map[postId] = {
-        content: value,
-        userAddress: store('address'),
-        trxId: res.trx_id,
-        id: postId,
-        storage: TrxStorage.cache,
-        timestamp: Date.now(),
-      };
+      runInAction(() => {
+        state.postAddressMap[postId] = state.address;
+        state.map[postId] = data.object;
+        state.ids.push(postId);
+      });
       setTimeout(goToBottom, 1);
     } catch (err) {
       console.log(err);
@@ -180,14 +201,15 @@ export default observer(() => {
         <div className="h-[76vh] overflow-auto px-8 pt-5 pb-2" ref={listContainerRef}>
           {state.ids.map((id) => {
             const post = state.map[id];
-            const fromMyself = post.userAddress === state.address;
-            const isSyncing = post.storage === TrxStorage.cache;
+            const postAddress = state.postAddressMap[id];
+            const fromMyself = postAddress === state.address;
+            const isSyncing = !state.postTrxMap[id];
             return (
               <div className={classNames({
                 'flex-row-reverse': fromMyself
               }, "mb-3 py-1 flex items-center w-full")} key={id}>
                 <div className="w-[42px] h-[42px] bg-white rounded-full" dangerouslySetInnerHTML={{
-                  __html: multiavatar(post.userAddress)
+                  __html: multiavatar(postAddress)
                 }} />
                 <Tooltip
                   placement={fromMyself ? 'left' : 'right'}
@@ -198,7 +220,7 @@ export default observer(() => {
                     if (isSyncing) {
                       return;
                     }
-                    state.trxId = post.trxId;
+                    state.trxId = state.postTrxMap[id];
                     state.openTrxModal = true;
                   }}
                 >
@@ -227,6 +249,11 @@ export default observer(() => {
         </div>
       </div>
       <div className="mt-5 relative flex items-center">
+        {state.sending && (
+          <div className="absolute inset-0 bg-white bg-opacity-50 w-full flex items-center justify-center z-10">
+            <Loading size={12} />
+          </div>
+        )}
         <div className="w-[42px] h-[42px] rounded-full mr-3" dangerouslySetInnerHTML={{
           __html: multiavatar(state.address)
         }} />
